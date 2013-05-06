@@ -201,6 +201,9 @@ public class MainActivity extends Activity implements CvCameraViewListener2, OnT
 			int id = item.getItemId();
 			if (id == 0){
 				// Image from gallery
+
+				Intent intent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+				startActivityForResult(intent, 0);
 				// Switch view
 				if (cameraSource){
 					cameraSource = false;
@@ -208,9 +211,6 @@ public class MainActivity extends Activity implements CvCameraViewListener2, OnT
 					cameraView.setVisibility(SurfaceView.INVISIBLE);
 					viewFlipper.showNext();
 				}
-
-				Intent intent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-				startActivityForResult(intent, 0);
 			} else {
 				// Camera source
 				// Switch view
