@@ -171,15 +171,31 @@ public class MainActivity extends Activity implements CvCameraViewListener2, OnT
 	public boolean onOptionsItemSelected(MenuItem item) {
 		if (item == mItemPreviewRGBA){
 			viewMode = ViewModes.VIEW_MODE_RGBA;
+			imageProcessor.setup(viewMode);
+			if (!cameraSource && galleryBitmap != null && !galleryEffect.empty()){
+				processImage();
+			}
 		}
 		else if (item == mItemPreviewDeuteranope){
 			viewMode = ViewModes.VIEW_MODE_DEUTERANOPE;
+			imageProcessor.setup(viewMode);
+			if (!cameraSource && galleryBitmap != null && !galleryEffect.empty()){
+				processImage();
+			}
 		}
 		else if (item == mItemPreviewProtanope){
 			viewMode = ViewModes.VIEW_MODE_PROTANOPE;
+			imageProcessor.setup(viewMode);
+			if (!cameraSource && galleryBitmap != null && !galleryEffect.empty()){
+				processImage();
+			}
 		}
 		else if (item == mItemPreviewTritanope){
 			viewMode = ViewModes.VIEW_MODE_TRITANOPE;
+			imageProcessor.setup(viewMode);
+			if (!cameraSource && galleryBitmap != null && !galleryEffect.empty()){
+				processImage();
+			}
 		}
 		else if (item.getGroupId() == 1){
 			int id = item.getItemId();
@@ -207,10 +223,7 @@ public class MainActivity extends Activity implements CvCameraViewListener2, OnT
 
 			}
 		}
-		if (!cameraSource && galleryBitmap != null){
-			processImage();
-		}
-		imageProcessor.setup(viewMode);
+
 
 		return true;
 	}
@@ -283,6 +296,7 @@ public class MainActivity extends Activity implements CvCameraViewListener2, OnT
 	}
 	private void processImage(){
 		galleryEffect = imageProcessor.process(galleryOriginal, viewMode);
+		galleryBitmap = Bitmap.createBitmap(galleryEffect.cols(), galleryEffect.rows(), Bitmap.Config.ARGB_8888);
 		Utils.matToBitmap(galleryEffect, galleryBitmap);
 		imageView.setImageBitmap(galleryBitmap);
 	}
