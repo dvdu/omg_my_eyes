@@ -14,6 +14,7 @@ import org.opencv.android.OpenCVLoader;
 import org.opencv.android.Utils;
 import org.opencv.core.Mat;
 
+
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -40,11 +41,7 @@ public class MainActivity extends Activity implements CvCameraViewListener2, OnT
 	private MenuItem[] sourceMenuItems;
 	private MenuItem[] defectMenuItems;
 
-	private MenuItem            mItemPreferences;
-	private MenuItem            mItemPreviewRGBA;
-	private MenuItem            mItemPreviewDeuteranope;	// problem with red
-	private MenuItem            mItemPreviewProtanope;		// problem with green
-	private MenuItem            mItemPreviewTritanope;		// problem with blue
+//	private MenuItem            mItemPreferences;
 	private SubMenu	            mItemSource;				// set the Source
 	private SubMenu	            mItemDefect;				// set the Defect
 	private Mat                 mRgba;
@@ -150,59 +147,23 @@ public class MainActivity extends Activity implements CvCameraViewListener2, OnT
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-//		mItemPreferences = menu.add("Preferences");
-//		mItemPreviewRGBA = menu.add("Normal");
-//		mItemPreviewDeuteranope = menu.add("Deuteranope");
-//		mItemPreviewProtanope = menu.add("Protanope");
-//		mItemPreviewTritanope = menu.add("Tritanope");
-		mItemDefect = menu.addSubMenu("Defect");
+		mItemDefect = menu.addSubMenu(R.string.defectTitle);
 		defectMenuItems = new MenuItem[4];
-		defectMenuItems[0] = mItemDefect.add(0, 0, Menu.NONE, "Normal");
-		defectMenuItems[1] = mItemDefect.add(0, 1, Menu.NONE, "Deuteranope");
-		defectMenuItems[2] = mItemDefect.add(0, 2, Menu.NONE, "Protanope");
-		defectMenuItems[3] = mItemDefect.add(0, 3, Menu.NONE, "Tritanope");
+		defectMenuItems[0] = mItemDefect.add(0, 0, Menu.NONE, R.string.defectNormal);
+		defectMenuItems[1] = mItemDefect.add(0, 1, Menu.NONE, R.string.defectDeuteranope);
+		defectMenuItems[2] = mItemDefect.add(0, 2, Menu.NONE, R.string.defectProtanope);
+		defectMenuItems[3] = mItemDefect.add(0, 3, Menu.NONE, R.string.defectTritanope);
 		
-		mItemSource = menu.addSubMenu("Source");
+		mItemSource = menu.addSubMenu(R.string.sourceTitle);
 		sourceMenuItems = new MenuItem[2];
-		sourceMenuItems[0] = mItemSource.add(1, 0, Menu.NONE, "Gallery");
-		sourceMenuItems[1] = mItemSource.add(1, 1, Menu.NONE, "Camera");
+		sourceMenuItems[0] = mItemSource.add(1, 0, Menu.NONE, R.string.sourceGallery);
+		sourceMenuItems[1] = mItemSource.add(1, 1, Menu.NONE, R.string.sourceCamera);
 
 		return true;
 	}
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
-//		if (item == mItemPreviewRGBA){
-//			viewMode = ViewModes.VIEW_MODE_RGBA;
-//			imageProcessor.setup(viewMode);
-//			if (!cameraSource && galleryBitmap != null && !galleryEffect.empty()){
-//				processImage();
-//			}
-//		}
-//		else if (item == mItemPreviewDeuteranope){
-//			viewMode = ViewModes.VIEW_MODE_DEUTERANOPE;
-//			imageProcessor.setup(viewMode);
-//			if (!cameraSource && galleryBitmap != null && !galleryEffect.empty()){
-//				processImage();
-//			}
-//		}
-//		else if (item == mItemPreviewProtanope){
-//			viewMode = ViewModes.VIEW_MODE_PROTANOPE;
-//			imageProcessor.setup(viewMode);
-//			if (!cameraSource && galleryBitmap != null && !galleryEffect.empty()){
-//				processImage();
-//			}
-//		}
-//		else if (item == mItemPreviewTritanope){
-//			viewMode = ViewModes.VIEW_MODE_TRITANOPE;
-//			imageProcessor.setup(viewMode);
-//			if (!cameraSource && galleryBitmap != null && !galleryEffect.empty()){
-//				processImage();
-//			}
-//		}
-//		if (item == mItemPreferences){
-//			startActivity(new Intent(this, Preferences.class));
-//	}
 		if (item.getGroupId() == 0){
 			int id = item.getItemId();
 			switch (id){
@@ -279,10 +240,10 @@ public class MainActivity extends Activity implements CvCameraViewListener2, OnT
 			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
 			String currentDateandTime = sdf.format(new Date());
 			// create directory 
-			File folder = new File(Environment.getExternalStorageDirectory().toString()+"/omg_my_eyes/");
+			File folder = new File(Environment.getExternalStorageDirectory().toString()+R.string.saveDir);
 			folder.mkdirs();
 			// define filename
-			String fileName = Environment.getExternalStorageDirectory().getPath() +	"/omg_my_eyes/img" + currentDateandTime + ".jpg";
+			String fileName = Environment.getExternalStorageDirectory().getPath() +	R.string.saveDir + "img" + currentDateandTime + ".jpg";
 			Bitmap bmp = null;
 			if (cameraSource){
 				bmp = Bitmap.createBitmap(mRgba.cols(),mRgba.rows(),Bitmap.Config.ARGB_8888);
@@ -297,11 +258,11 @@ public class MainActivity extends Activity implements CvCameraViewListener2, OnT
 				Boolean result = bmp.compress(Bitmap.CompressFormat.JPEG, 90, out);
 				// print user message
 				if (result){
-					Toast.makeText(this, "Image saved in: memory_card/omg_my_eyes" , Toast.LENGTH_SHORT).show();
+					Toast.makeText(this, R.string.saveSuccess + R.string.saveDir , Toast.LENGTH_SHORT).show();
 				}
 				else
 				{
-					Toast.makeText(this, "Problem while saving", Toast.LENGTH_SHORT).show();
+					Toast.makeText(this, R.string.saveError, Toast.LENGTH_SHORT).show();
 				}
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -309,7 +270,7 @@ public class MainActivity extends Activity implements CvCameraViewListener2, OnT
 		}
 		else
 		{
-			Toast.makeText(this, "Can't touch this - no memory card.", Toast.LENGTH_SHORT).show();
+			Toast.makeText(this, R.string.saveNoCard, Toast.LENGTH_SHORT).show();
 		}
 		return false;
 	}
