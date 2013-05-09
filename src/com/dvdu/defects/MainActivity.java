@@ -1,4 +1,4 @@
-package com.adudziec.defects;
+package com.dvdu.defects;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -13,6 +13,8 @@ import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
 import org.opencv.android.Utils;
 import org.opencv.core.Mat;
+
+import com.adudziec.defects.R;
 
 
 import android.app.Activity;

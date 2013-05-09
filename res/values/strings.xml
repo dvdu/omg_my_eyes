@@ -7,6 +7,9 @@
     <string name="defectDeuteranope">Deuteranope</string>
     <string name="defectProtanope">Protanope</string>
     <string name="defectTritanope">Tritanope</string>
+    <string name="defectCataract">Cataract</string>
+    <string name="defectDiabeticRetinopathy">Diabetic retinopathy</string>
+    <string name="defectRetinitisPigmentosa">Retinitis pigmentosa</string>
     
     <string name="sourceTitle">Source</string>
     <string name="sourceCamera">Camera</string>

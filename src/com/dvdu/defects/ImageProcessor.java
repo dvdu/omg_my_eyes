@@ -1,4 +1,4 @@
-package com.adudziec.defects;
+package com.dvdu.defects;
 
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;

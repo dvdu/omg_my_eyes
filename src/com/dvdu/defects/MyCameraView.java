@@ -1,4 +1,4 @@
-package com.adudziec.defects;
+package com.dvdu.defects;
 
 import java.util.List;
 

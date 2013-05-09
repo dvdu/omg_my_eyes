@@ -1,4 +1,6 @@
-package com.adudziec.defects;
+package com.dvdu.defects;
+
+import com.adudziec.defects.R;
 
 import android.os.Bundle;
 import android.preference.PreferenceActivity;
