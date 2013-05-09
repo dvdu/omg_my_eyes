@@ -8,6 +8,10 @@
 package com.adudziec.defects;
 
 public final class R {
+    public static final class array {
+        public static final int effects_int_array=0x7f060001;
+        public static final int effects_str_array=0x7f060000;
+    }
     public static final class attr {
         /** <p>May be an integer value, such as "<code>100</code>".
 <p>This may also be a reference to a resource (in the form
@@ -50,9 +54,12 @@ containing a value of this type.
     }
     public static final class layout {
         public static final int main_view=0x7f030000;
+        public static final int preferences=0x7f030001;
     }
     public static final class string {
         public static final int app_name=0x7f050000;
+        public static final int summary_effect=0x7f050002;
+        public static final int title_effect=0x7f050001;
     }
     public static final class styleable {
         /** Attributes that can be used with a CameraBridgeViewBase.

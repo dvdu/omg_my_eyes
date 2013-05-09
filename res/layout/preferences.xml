@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <ListPreference
+        android:defaultValue="0"
+        android:entries="@array/effects_str_array"
+        android:entryValues="@array/effects_int_array"
+        android:key="pref_effect"
+        android:summary="@string/summary_effect"
+        android:title="@string/title_effect" >
+    </ListPreference>
+
+</PreferenceScreen>

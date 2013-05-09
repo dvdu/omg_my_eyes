@@ -2,6 +2,7 @@ package com.adudziec.defects;
 
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
+import org.opencv.imgproc.Imgproc;
 
 public class ImageProcessor {
 	
@@ -27,7 +28,6 @@ public class ImageProcessor {
 		anchor_e[0] = 0.05059983 + 0.08585369 + 0.00952420;
 		anchor_e[1] = 0.01893033 + 0.08925308 + 0.01370054;
 		anchor_e[2] = 0.00292202 + 0.00975732 + 0.07145979;
-
 		switch (viewMode)
 		{
 		case VIEW_MODE_RGBA:

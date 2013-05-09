@@ -1,7 +1,18 @@
 multithreading kamery?
+wybor efektu przez preferencje a nie menu
 
 defekty do ogarnięcia:
 zaćma (blur)
 retinopatia cukrzycowa (obszary czarnych plam)
+
+kilka "kłębków" losowo ustawić na macierzy, później dylacja (albo wybrać jedno losowe miejsce i kilka ustawic w losowej odległosci od tego miejsca)
+przemnożyć macierz
+blur
+
+
+
 retinopatia barwnikowa (widzenie lunetowe)
+
+jak wyżej, tylko losowe miejsce początkowe jest środkiem
+
 zwyrodnienie plamki (pozaginane linie na środku + blur)
