@@ -2,7 +2,6 @@ package com.dvdu.defects;
 
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
-import org.opencv.imgproc.Imgproc;
 
 public class ImageProcessor {
 	
@@ -58,6 +57,12 @@ public class ImageProcessor {
 			b2 = anchor_e[2] * anchor[3]  - anchor_e[0] * anchor[5];
 			c2 = anchor_e[0] * anchor[4]  - anchor_e[1] * anchor[3];
 			inflection = (anchor_e[1] / anchor_e[0]);
+			break;
+		case VIEW_MODE_CATARACT:
+			break;
+		case VIEW_MODE_DIABETIC_RETINOPATHY:
+		case VIEW_MODE_RETINIS_PIGMENTOSA:
+			// stworzyc structuring element
 			break;
 		default:
 			break;
