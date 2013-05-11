@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">OMG! My eyes!</string>
+    <string name="app_name">OMG!\nMy eyes!</string>
   
     <string name="defectTitle">Defect</string>
     <string name="defectNormal">Normal</string>
