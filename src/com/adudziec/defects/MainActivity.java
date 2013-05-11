@@ -1,4 +1,4 @@
-package com.dvdu.defects;
+package com.adudziec.defects;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -13,9 +13,6 @@ import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
 import org.opencv.android.Utils;
 import org.opencv.core.Mat;
-
-import com.adudziec.defects.R;
-
 
 import android.app.Activity;
 import android.content.Intent;
@@ -43,7 +40,7 @@ public class MainActivity extends Activity implements CvCameraViewListener2, OnT
 	private MenuItem[] sourceMenuItems;
 	private MenuItem[] defectMenuItems;
 
-//	private MenuItem            mItemPreferences;
+	//	private MenuItem            mItemPreferences;
 	private SubMenu	            mItemSource;				// set the Source
 	private SubMenu	            mItemDefect;				// set the Defect
 	private Mat                 mRgba;
@@ -140,6 +137,15 @@ public class MainActivity extends Activity implements CvCameraViewListener2, OnT
 		case VIEW_MODE_TRITANOPE:
 			imageProcessor.tritanope(mRgba);
 			break;
+		case VIEW_MODE_CATARACT:
+			imageProcessor.cataract(mRgba);
+			break;
+		case VIEW_MODE_DIABETIC_RETINOPATHY:
+			imageProcessor.diabeticRetinopathy(mRgba);
+			break;
+		case VIEW_MODE_RETINIS_PIGMENTOSA:
+			imageProcessor.retinisPigmentosa(mRgba);
+			break;
 		default:
 			break;
 		}
@@ -150,16 +156,19 @@ public class MainActivity extends Activity implements CvCameraViewListener2, OnT
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		mItemDefect = menu.addSubMenu(R.string.defectTitle);
-		defectMenuItems = new MenuItem[4];
-		defectMenuItems[0] = mItemDefect.add(0, 0, Menu.NONE, R.string.defectNormal);
-		defectMenuItems[1] = mItemDefect.add(0, 1, Menu.NONE, R.string.defectDeuteranope);
-		defectMenuItems[2] = mItemDefect.add(0, 2, Menu.NONE, R.string.defectProtanope);
-		defectMenuItems[3] = mItemDefect.add(0, 3, Menu.NONE, R.string.defectTritanope);
-		
+		defectMenuItems = new MenuItem[7];
+		defectMenuItems[0] = mItemDefect.add(0, 1, Menu.NONE, R.string.defectNormal);
+		defectMenuItems[1] = mItemDefect.add(0, 2, Menu.NONE, R.string.defectDeuteranope);
+		defectMenuItems[2] = mItemDefect.add(0, 3, Menu.NONE, R.string.defectProtanope);
+		defectMenuItems[3] = mItemDefect.add(0, 4, Menu.NONE, R.string.defectTritanope);
+		defectMenuItems[4] = mItemDefect.add(0, 5, Menu.NONE, R.string.defectCataract);
+		defectMenuItems[5] = mItemDefect.add(0, 6, Menu.NONE, R.string.defectDiabeticRetinopathy);
+		defectMenuItems[6] = mItemDefect.add(0, 7, Menu.NONE, R.string.defectRetinitisPigmentosa);
+
 		mItemSource = menu.addSubMenu(R.string.sourceTitle);
 		sourceMenuItems = new MenuItem[2];
-		sourceMenuItems[0] = mItemSource.add(1, 0, Menu.NONE, R.string.sourceGallery);
-		sourceMenuItems[1] = mItemSource.add(1, 1, Menu.NONE, R.string.sourceCamera);
+		sourceMenuItems[0] = mItemSource.add(1, 1, Menu.NONE, R.string.sourceGallery);
+		sourceMenuItems[1] = mItemSource.add(1, 2, Menu.NONE, R.string.sourceCamera);
 
 		return true;
 	}
@@ -169,40 +178,69 @@ public class MainActivity extends Activity implements CvCameraViewListener2, OnT
 		if (item.getGroupId() == 0){
 			int id = item.getItemId();
 			switch (id){
-			case 0:
-				viewMode = ViewModes.VIEW_MODE_RGBA;
-				imageProcessor.setup(viewMode);
-				if (!cameraSource && galleryBitmap != null && !galleryEffect.empty()){
-					processImage();
-				}
-				break;
 			case 1:
-				viewMode = ViewModes.VIEW_MODE_DEUTERANOPE;
-				imageProcessor.setup(viewMode);
+				viewMode = ViewModes.VIEW_MODE_RGBA;
+				imageProcessor.setupColorBlindness(viewMode);
 				if (!cameraSource && galleryBitmap != null && !galleryEffect.empty()){
 					processImage();
 				}
 				break;
 			case 2:
-				viewMode = ViewModes.VIEW_MODE_PROTANOPE;
-				imageProcessor.setup(viewMode);
+				viewMode = ViewModes.VIEW_MODE_DEUTERANOPE;
+				imageProcessor.setupColorBlindness(viewMode);
 				if (!cameraSource && galleryBitmap != null && !galleryEffect.empty()){
 					processImage();
 				}
 				break;
 			case 3:
-				viewMode = ViewModes.VIEW_MODE_TRITANOPE;
-				imageProcessor.setup(viewMode);
+				viewMode = ViewModes.VIEW_MODE_PROTANOPE;
+				imageProcessor.setupColorBlindness(viewMode);
 				if (!cameraSource && galleryBitmap != null && !galleryEffect.empty()){
 					processImage();
 				}
 				break;
-				
+			case 4:
+				viewMode = ViewModes.VIEW_MODE_TRITANOPE;
+				imageProcessor.setupColorBlindness(viewMode);
+				if (!cameraSource && galleryBitmap != null && !galleryEffect.empty()){
+					processImage();
+				}
+				break;
+			case 5:
+				viewMode = ViewModes.VIEW_MODE_CATARACT;
+				if (!cameraSource && galleryBitmap != null && !galleryEffect.empty()){
+					processImage();
+				}
+				break;
+			case 6:
+				viewMode = ViewModes.VIEW_MODE_DIABETIC_RETINOPATHY;
+				if (cameraSource) {
+					imageProcessor.setupRetinopathy(mRgba);
+				} else {
+					imageProcessor.setupRetinopathy(galleryOriginal);
+				}
+				if (!cameraSource && galleryBitmap != null && !galleryEffect.empty()){
+					processImage();
+				}
+				break;
+			case 7:
+				viewMode = ViewModes.VIEW_MODE_RETINIS_PIGMENTOSA;
+				if (cameraSource) {
+					imageProcessor.setupPigmentosa(mRgba);
+				} else {
+					imageProcessor.setupPigmentosa(galleryOriginal);
+				}
+				if (!cameraSource && galleryBitmap != null && !galleryEffect.empty()){
+					processImage();
+				}
+				break;
+			default:
+
 			}
 		}
 		else if (item.getGroupId() == 1){
 			int id = item.getItemId();
-			if (id == 0){
+			if (id == 1){
 				// Image from gallery
 
 				Intent intent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
@@ -214,7 +252,7 @@ public class MainActivity extends Activity implements CvCameraViewListener2, OnT
 					cameraView.setVisibility(SurfaceView.INVISIBLE);
 					viewFlipper.showNext();
 				}
-			} else {
+			} else if (id == 2){
 				// Camera source
 				// Switch view
 				if (!cameraSource){
@@ -237,7 +275,7 @@ public class MainActivity extends Activity implements CvCameraViewListener2, OnT
 	public boolean onTouch(View v, MotionEvent event) { // save on touch
 		Boolean isSDPresent = android.os.Environment.getExternalStorageState().equals(android.os.Environment.MEDIA_MOUNTED);
 		// check if memory card is present
-		if(isSDPresent)
+		if(isSDPresent)// TODO && (galleryBitmap != null || !mRgba.empty()))
 		{
 			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
 			String currentDateandTime = sdf.format(new Date());

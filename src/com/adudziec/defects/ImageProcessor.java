@@ -1,21 +1,30 @@
-package com.dvdu.defects;
+package com.adudziec.defects;
 
+import java.util.Random;
+
+import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
+import org.opencv.core.Point;
+import org.opencv.core.Scalar;
+import org.opencv.core.Size;
+import org.opencv.imgproc.Imgproc;
 
 public class ImageProcessor {
 	
 	private double a1, b1, c1, a2, b2, c2, inflection, tmpDouble, L, M, S;
 	private float[] 			buff;
-	private Mat					 tmp;
-	private double[]			 RGB_LMS = {0.05059983, 0.08585369, 0.00952420,
+	private Mat					tmp;
+	private Mat					spotsMatrix = null;
+	private double[]			RGB_LMS =  {0.05059983, 0.08585369, 0.00952420,
 											0.01893033, 0.08925308, 0.01370054,
 											0.00292202, 0.00975732, 0.07145979};
-	private double[]			 LMS_RGB = {30.830854, -29.832659, 1.610474, 
+	private double[]			LMS_RGB =  {30.830854, -29.832659, 1.610474, 
 											-6.481468, 17.715578, -2.532642,
 											-0.375690, -1.199062, 14.273846};
+
 	
-	public void setup(ViewModes viewMode){
+	public void setupColorBlindness(ViewModes viewMode){
 		double anchor_e[] = new double[3];
 		double anchor[] = new double[12];
 
@@ -29,8 +38,6 @@ public class ImageProcessor {
 		anchor_e[2] = 0.00292202 + 0.00975732 + 0.07145979;
 		switch (viewMode)
 		{
-		case VIEW_MODE_RGBA:
-			break;
 		case VIEW_MODE_DEUTERANOPE:
 			a1 = anchor_e[1] * anchor[8] - anchor_e[2] * anchor[7];
 			b1 = anchor_e[2] * anchor[6] - anchor_e[0] * anchor[8];
@@ -58,15 +65,73 @@ public class ImageProcessor {
 			c2 = anchor_e[0] * anchor[4]  - anchor_e[1] * anchor[3];
 			inflection = (anchor_e[1] / anchor_e[0]);
 			break;
-		case VIEW_MODE_CATARACT:
-			break;
-		case VIEW_MODE_DIABETIC_RETINOPATHY:
-		case VIEW_MODE_RETINIS_PIGMENTOSA:
-			// stworzyc structuring element
-			break;
 		default:
 			break;
 		}
+	}
+	
+	public void setupPigmentosa(Mat source){
+		// widzenie lunetowe
+	}
+	
+	public void setupRetinopathy(Mat source){
+//		spotElement = Mat.ones(5, 5, CvType.CV_8U);
+		spotsMatrix = source.clone();
+		spotsMatrix.setTo(new Scalar(1));
+		int rows = (int) spotsMatrix.size().height;
+		int cols = (int) spotsMatrix.size().width;
+		int factor = 5;
+		
+		Random r = new Random();
+		// generate first (anchor) point
+		int x = r.nextInt(cols - 2*(cols/factor)) + (cols/factor);
+		int y = r.nextInt(rows - 2*(rows/factor)) + (rows/factor);
+		Mat tmpMat = spotsMatrix.submat(y, y+5, x, x+5);
+		addSpots(tmpMat);
+		int xPrim, yPrim;
+		int distance = Math.min(cols/factor, rows/factor);
+		int iterations = 0;
+		while( iterations < spotsMatrix.size().area()/500){
+			xPrim = x + r.nextInt((cols/factor)) - (cols/factor)/2;
+			yPrim = y + r.nextInt((rows/factor)) - (rows/factor/2);
+			if (xPrim + yPrim > distance*10)
+				continue;
+			tmpMat = spotsMatrix.submat(yPrim, yPrim+5, xPrim, xPrim+5);
+			addSpots(tmpMat);
+			iterations++;
+		}
+		
+
+		Mat erosionElement = Imgproc.getStructuringElement(Imgproc.MORPH_ELLIPSE, new Size(3, 3));
+		Mat dilationElement = Imgproc.getStructuringElement(Imgproc.MORPH_ELLIPSE, new Size(1, 1));
+		Imgproc.dilate(spotsMatrix, spotsMatrix, dilationElement, new Point(-1, -1), 1);
+		Imgproc.erode(spotsMatrix, spotsMatrix, erosionElement, new Point(-1, -1), 20);
+		Imgproc.dilate(spotsMatrix, spotsMatrix, dilationElement, new Point(-1, -1), 20);
+		// stwórz plamy
+	}
+	
+	private void addSpots(Mat tmpMat){
+		// cross structuring element
+//		tmpMat.put(0, 0, 0, 0, 0, 1);
+//		tmpMat.put(1, 1, 0, 0, 0, 1);
+//		tmpMat.put(2, 2, 0, 0, 0, 1);
+//		tmpMat.put(3, 3, 0, 0, 0, 1);
+//		tmpMat.put(4, 4, 0, 0, 0, 1);
+//		tmpMat.put(4, 0, 0, 0, 0, 1);
+//		tmpMat.put(3, 1, 0, 0, 0, 1);
+//		tmpMat.put(1, 3, 0, 0, 0, 1);
+//		tmpMat.put(0, 4, 0, 0, 0, 1);
+		
+		// circle structuring element
+		tmpMat.put(0, 1, 0, 0, 0, 1);
+		tmpMat.put(0, 3, 0, 0, 0, 1);
+		tmpMat.put(1, 0, 0, 0, 0, 1);
+		tmpMat.put(1, 4, 0, 0, 0, 1);
+		tmpMat.put(2, 2, 0, 0, 0, 1);
+		tmpMat.put(3, 0, 0, 0, 0, 1);
+		tmpMat.put(3, 4, 0, 0, 0, 1);
+		tmpMat.put(4, 1, 0, 0, 0, 1);
+		tmpMat.put(4, 3, 0, 0, 0, 1);
 	}
 	
 	public Mat process(Mat src, ViewModes viewMode){
@@ -83,6 +148,15 @@ public class ImageProcessor {
 			break;
 		case VIEW_MODE_TRITANOPE:
 			tritanope(result);
+			break;
+		case VIEW_MODE_CATARACT:
+			cataract(result);
+			break;
+		case VIEW_MODE_DIABETIC_RETINOPATHY:
+			diabeticRetinopathy(result);
+			break;
+		case VIEW_MODE_RETINIS_PIGMENTOSA:
+			retinisPigmentosa(result);
 			break;
 		default:
 			break;
@@ -187,6 +261,20 @@ public class ImageProcessor {
 		tmp.put(0, 0, buff);
 		tmp.convertTo(mRgba, mRgba.depth());
 		
+	}
+	
+	public void cataract(Mat mRgba){
+		Imgproc.blur(mRgba, mRgba, new Size(9, 9));
+	}
+	
+	public void diabeticRetinopathy(Mat mRgba){
+		Core.multiply(spotsMatrix, mRgba, mRgba);
+		Imgproc.blur(mRgba, mRgba, new Size(7, 7));
+	}
+	
+	public void retinisPigmentosa(Mat mRgba){
+		Core.multiply(spotsMatrix, mRgba, mRgba);
+		Imgproc.blur(mRgba, mRgba, new Size(7, 7));
 	}
 	
 	

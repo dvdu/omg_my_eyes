@@ -1,4 +1,4 @@
-package com.dvdu.defects;
+package com.adudziec.defects;
 
 public enum ViewModes {
 	VIEW_MODE_RGBA,
