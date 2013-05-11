@@ -15,8 +15,8 @@
     <string name="sourceCamera">Camera</string>
     <string name="sourceGallery">Gallery</string>
     
-    <string name="saveNoCard">Cannot touch this - no memory card.</string>
-    <string name="openError">Cannot open image</string>
+    <string name="saveNoCard">Can\'t touch this - no memory card.</string>
+    <string name="openError">Can\'t open image</string>
     <string name="saveError">Problem while saving</string>
     <string name="saveSuccess">Image saved in: memory_card</string>
     <string name="saveDir">/omg_my_eyes/</string>

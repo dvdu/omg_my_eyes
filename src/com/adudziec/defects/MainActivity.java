@@ -280,10 +280,10 @@ public class MainActivity extends Activity implements CvCameraViewListener2, OnT
 			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
 			String currentDateandTime = sdf.format(new Date());
 			// create directory 
-			File folder = new File(Environment.getExternalStorageDirectory().toString()+R.string.saveDir);
+			File folder = new File(Environment.getExternalStorageDirectory().toString()+getString(R.string.saveDir));
 			folder.mkdirs();
 			// define filename
-			String fileName = Environment.getExternalStorageDirectory().getPath() +	R.string.saveDir + "img" + currentDateandTime + ".jpg";
+			String fileName = Environment.getExternalStorageDirectory().getPath() +	getString(R.string.saveDir) + "img" + currentDateandTime + ".jpg";
 			Bitmap bmp = null;
 			if (cameraSource){
 				bmp = Bitmap.createBitmap(mRgba.cols(),mRgba.rows(),Bitmap.Config.ARGB_8888);
@@ -298,11 +298,11 @@ public class MainActivity extends Activity implements CvCameraViewListener2, OnT
 				Boolean result = bmp.compress(Bitmap.CompressFormat.JPEG, 90, out);
 				// print user message
 				if (result){
-					Toast.makeText(this, R.string.saveSuccess + R.string.saveDir , Toast.LENGTH_SHORT).show();
+					Toast.makeText(this, getString(R.string.saveSuccess) + getString(R.string.saveDir) , Toast.LENGTH_SHORT).show();
 				}
 				else
 				{
-					Toast.makeText(this, R.string.saveError, Toast.LENGTH_SHORT).show();
+					Toast.makeText(this, getString(R.string.saveError), Toast.LENGTH_SHORT).show();
 				}
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -310,7 +310,7 @@ public class MainActivity extends Activity implements CvCameraViewListener2, OnT
 		}
 		else
 		{
-			Toast.makeText(this, R.string.saveNoCard, Toast.LENGTH_SHORT).show();
+			Toast.makeText(this, getString(R.string.saveNoCard), Toast.LENGTH_SHORT).show();
 		}
 		return false;
 	}
@@ -325,7 +325,7 @@ public class MainActivity extends Activity implements CvCameraViewListener2, OnT
 				galleryBitmap = BitmapFactory.decodeStream(getContentResolver().openInputStream(targetUri));
 				Utils.bitmapToMat(galleryBitmap, galleryOriginal);
 				if(galleryOriginal.empty()) {
-					Toast.makeText(this, "Cannot open image", Toast.LENGTH_LONG).show();
+					Toast.makeText(this, getString(R.string.openError), Toast.LENGTH_LONG).show();
 				} else {
 					processImage();
 				}
