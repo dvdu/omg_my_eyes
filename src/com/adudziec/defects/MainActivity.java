@@ -50,7 +50,8 @@ public class MainActivity extends Activity implements CvCameraViewListener2, OnC
 	private Bitmap				galleryBitmap = null;
 	private ImageProcessor		imageProcessor;
 	private Boolean				cameraSource = true;
-	public static ViewModes     viewMode = ViewModes.VIEW_MODE_RGBA;
+	private Boolean				imageSaved = false;
+	private static ViewModes    viewMode = ViewModes.VIEW_MODE_RGBA;
 
 	private BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(this) {
 		@Override
@@ -112,6 +113,8 @@ public class MainActivity extends Activity implements CvCameraViewListener2, OnC
 		super.onDestroy();
 		if (cameraView != null)
 			cameraView.disableView();
+		if (imageSaved)
+			sendBroadcast(new Intent(Intent.ACTION_MEDIA_MOUNTED, Uri.parse("file://" + Environment.getExternalStorageDirectory())));
 	}
 
 	public void onCameraViewStarted(int width, int height) {
@@ -182,36 +185,21 @@ public class MainActivity extends Activity implements CvCameraViewListener2, OnC
 			case 1:
 				viewMode = ViewModes.VIEW_MODE_RGBA;
 				imageProcessor.setupColorBlindness(viewMode);
-				if (!cameraSource && galleryBitmap != null && !galleryEffect.empty()){
-					processImage();
-				}
 				break;
 			case 2:
 				viewMode = ViewModes.VIEW_MODE_DEUTERANOPE;
 				imageProcessor.setupColorBlindness(viewMode);
-				if (!cameraSource && galleryBitmap != null && !galleryEffect.empty()){
-					processImage();
-				}
 				break;
 			case 3:
 				viewMode = ViewModes.VIEW_MODE_PROTANOPE;
 				imageProcessor.setupColorBlindness(viewMode);
-				if (!cameraSource && galleryBitmap != null && !galleryEffect.empty()){
-					processImage();
-				}
 				break;
 			case 4:
 				viewMode = ViewModes.VIEW_MODE_TRITANOPE;
 				imageProcessor.setupColorBlindness(viewMode);
-				if (!cameraSource && galleryBitmap != null && !galleryEffect.empty()){
-					processImage();
-				}
 				break;
 			case 5:
 				viewMode = ViewModes.VIEW_MODE_CATARACT;
-				if (!cameraSource && galleryBitmap != null && !galleryEffect.empty()){
-					processImage();
-				}
 				break;
 			case 6:
 				viewMode = ViewModes.VIEW_MODE_DIABETIC_RETINOPATHY;
@@ -219,9 +207,6 @@ public class MainActivity extends Activity implements CvCameraViewListener2, OnC
 					imageProcessor.setupRetinopathy(mRgba);
 				} else {
 					imageProcessor.setupRetinopathy(galleryOriginal);
-				}
-				if (!cameraSource && galleryBitmap != null && !galleryEffect.empty()){
-					processImage();
 				}
 				break;
 			case 7:
@@ -231,36 +216,29 @@ public class MainActivity extends Activity implements CvCameraViewListener2, OnC
 				} else {
 					imageProcessor.setupPigmentosa(galleryOriginal);
 				}
-				if (!cameraSource && galleryBitmap != null && !galleryEffect.empty()){
-					processImage();
-				}
 				break;
 			default:
 
+			}
+			if (!cameraSource && galleryBitmap != null && !galleryEffect.empty()){
+				processImage();
 			}
 		}
 		else if (item.getGroupId() == 1){
 			int id = item.getItemId();
 			if (id == 1){
 				// Image from gallery
-
 				Intent intent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
 				startActivityForResult(intent, 0);
 				// Switch view
 				if (cameraSource){
-					cameraSource = false;
-					imageView.setVisibility(SurfaceView.VISIBLE);
-					cameraView.setVisibility(SurfaceView.INVISIBLE);
-					viewFlipper.showNext();
+					flipToGallery();
 				}
 			} else if (id == 2){
 				// Camera source
 				// Switch view
 				if (!cameraSource){
-					cameraSource = true;
-					cameraView.setVisibility(SurfaceView.VISIBLE);
-					imageView.setVisibility(SurfaceView.INVISIBLE);
-					viewFlipper.showPrevious();
+					flipToCamera();
 				}
 
 			}
@@ -276,7 +254,7 @@ public class MainActivity extends Activity implements CvCameraViewListener2, OnC
 	public void onClick(View v) { // save on touch
 		Boolean isSDPresent = android.os.Environment.getExternalStorageState().equals(android.os.Environment.MEDIA_MOUNTED);
 		// check if memory card is present
-		if(isSDPresent)// TODO && (galleryBitmap != null || !mRgba.empty()))
+		if(isSDPresent && (galleryBitmap != null || !mRgba.empty()))
 		{
 			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
 			String currentDateandTime = sdf.format(new Date());
@@ -300,7 +278,7 @@ public class MainActivity extends Activity implements CvCameraViewListener2, OnC
 				// print user message
 				if (result){
 					Toast.makeText(this, getString(R.string.saveSuccess) + getString(R.string.saveDir) , Toast.LENGTH_SHORT).show();
-					sendBroadcast(new Intent(Intent.ACTION_MEDIA_MOUNTED, Uri.parse("file://" + Environment.getExternalStorageDirectory())));
+					imageSaved = true;
 				}
 				else
 				{
@@ -333,6 +311,8 @@ public class MainActivity extends Activity implements CvCameraViewListener2, OnC
 			} catch (FileNotFoundException e) {
 				e.printStackTrace();
 			}
+		} else {
+			flipToCamera();
 		}
 
 	}
@@ -341,6 +321,20 @@ public class MainActivity extends Activity implements CvCameraViewListener2, OnC
 		galleryBitmap = Bitmap.createBitmap(galleryEffect.cols(), galleryEffect.rows(), Bitmap.Config.ARGB_8888);
 		Utils.matToBitmap(galleryEffect, galleryBitmap);
 		imageView.setImageBitmap(galleryBitmap);
+	}
+	
+	private void flipToGallery(){
+		cameraSource = false;
+		imageView.setVisibility(SurfaceView.VISIBLE);
+		cameraView.setVisibility(SurfaceView.INVISIBLE);
+		viewFlipper.showNext();
+	}
+	
+	private void flipToCamera(){
+		cameraSource = true;
+		cameraView.setVisibility(SurfaceView.VISIBLE);
+		imageView.setVisibility(SurfaceView.INVISIBLE);
+		viewFlipper.showPrevious();
 	}
 
 }
