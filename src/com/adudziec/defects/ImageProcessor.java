@@ -71,23 +71,55 @@ public class ImageProcessor {
 	}
 	
 	public void setupPigmentosa(Mat source){
-		// widzenie lunetowe
+		// only small circle of visible area
+		spotsMatrix = source.clone();
+		spotsMatrix.setTo(new Scalar(0));
+		int rows = (int) spotsMatrix.size().height;
+		int cols = (int) spotsMatrix.size().width;
+		int factor = 2;
+		
+		Random r = new Random();
+		// generate first (anchor) point
+		int x = cols/2;
+		int y = rows/2;
+		Mat tmpMat = spotsMatrix.submat(y, y+5, x, x+5);
+		addSpots(tmpMat, 1);
+		int xPrim, yPrim;
+		int distance = Math.min(cols/factor, rows/factor);
+		int iterations = 0;
+		while( iterations < spotsMatrix.size().area()/(factor*30)){
+			xPrim = x + r.nextInt((cols/factor)) - (cols/factor)/2;
+			yPrim = y + r.nextInt((rows/factor)) - (rows/factor/2);
+			if (Math.sqrt((xPrim - x)*(xPrim - x) + (yPrim - y)*(yPrim - y)) > distance/2)
+				continue;
+			tmpMat = spotsMatrix.submat(yPrim, yPrim+5, xPrim, xPrim+5);
+			addSpots(tmpMat, 1);
+			iterations++;
+		}
+		
+
+		Mat erosionElement = Imgproc.getStructuringElement(Imgproc.MORPH_ELLIPSE, new Size(2, 2));
+		Mat dilationElement = Imgproc.getStructuringElement(Imgproc.MORPH_ELLIPSE, new Size(3, 3));
+		Imgproc.erode(spotsMatrix, spotsMatrix, erosionElement, new Point(-1, -1), 1);
+		Imgproc.dilate(spotsMatrix, spotsMatrix, dilationElement, new Point(-1, -1), 8);
+		Imgproc.erode(spotsMatrix, spotsMatrix, erosionElement, new Point(-1, -1), 3);
+		Imgproc.blur(spotsMatrix, spotsMatrix, new Size(15, 15));
 	}
 	
 	public void setupRetinopathy(Mat source){
-//		spotElement = Mat.ones(5, 5, CvType.CV_8U);
+		// black spot in random place
 		spotsMatrix = source.clone();
 		spotsMatrix.setTo(new Scalar(1));
 		int rows = (int) spotsMatrix.size().height;
 		int cols = (int) spotsMatrix.size().width;
-		int factor = 5;
+		int factor = 6;
 		
 		Random r = new Random();
 		// generate first (anchor) point
 		int x = r.nextInt(cols - 2*(cols/factor)) + (cols/factor);
 		int y = r.nextInt(rows - 2*(rows/factor)) + (rows/factor);
 		Mat tmpMat = spotsMatrix.submat(y, y+5, x, x+5);
-		addSpots(tmpMat);
+		addSpots(tmpMat, 0);
 		int xPrim, yPrim;
 		int distance = Math.min(cols/factor, rows/factor);
 		int iterations = 0;
@@ -97,7 +129,7 @@ public class ImageProcessor {
 			if (xPrim + yPrim > distance*10)
 				continue;
 			tmpMat = spotsMatrix.submat(yPrim, yPrim+5, xPrim, xPrim+5);
-			addSpots(tmpMat);
+			addSpots(tmpMat, 0);
 			iterations++;
 		}
 		
@@ -107,10 +139,9 @@ public class ImageProcessor {
 		Imgproc.dilate(spotsMatrix, spotsMatrix, dilationElement, new Point(-1, -1), 1);
 		Imgproc.erode(spotsMatrix, spotsMatrix, erosionElement, new Point(-1, -1), 20);
 		Imgproc.dilate(spotsMatrix, spotsMatrix, dilationElement, new Point(-1, -1), 20);
-		// stwórz plamy
 	}
 	
-	private void addSpots(Mat tmpMat){
+	private void addSpots(Mat tmpMat, int data){
 		// cross structuring element
 //		tmpMat.put(0, 0, 0, 0, 0, 1);
 //		tmpMat.put(1, 1, 0, 0, 0, 1);
@@ -123,15 +154,15 @@ public class ImageProcessor {
 //		tmpMat.put(0, 4, 0, 0, 0, 1);
 		
 		// circle structuring element
-		tmpMat.put(0, 1, 0, 0, 0, 1);
-		tmpMat.put(0, 3, 0, 0, 0, 1);
-		tmpMat.put(1, 0, 0, 0, 0, 1);
-		tmpMat.put(1, 4, 0, 0, 0, 1);
-		tmpMat.put(2, 2, 0, 0, 0, 1);
-		tmpMat.put(3, 0, 0, 0, 0, 1);
-		tmpMat.put(3, 4, 0, 0, 0, 1);
-		tmpMat.put(4, 1, 0, 0, 0, 1);
-		tmpMat.put(4, 3, 0, 0, 0, 1);
+		tmpMat.put(0, 1, data, data, data, data);
+		tmpMat.put(0, 3, data, data, data, data);
+		tmpMat.put(1, 0, data, data, data, data);
+		tmpMat.put(1, 4, data, data, data, data);
+		tmpMat.put(2, 2, data, data, data, data);
+		tmpMat.put(3, 0, data, data, data, data);
+		tmpMat.put(3, 4, data, data, data, data);
+		tmpMat.put(4, 1, data, data, data, data);
+		tmpMat.put(4, 3, data, data, data, data);
 	}
 	
 	public Mat process(Mat src, ViewModes viewMode){
@@ -274,7 +305,6 @@ public class ImageProcessor {
 	
 	public void retinisPigmentosa(Mat mRgba){
 		Core.multiply(spotsMatrix, mRgba, mRgba);
-		Imgproc.blur(mRgba, mRgba, new Size(7, 7));
 	}
 	
 	
