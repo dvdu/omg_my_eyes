@@ -27,13 +27,14 @@ import android.view.MotionEvent;
 import android.view.SubMenu;
 import android.view.SurfaceView;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.View.OnTouchListener;
 import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.Toast;
 import android.widget.ViewFlipper;
 
-public class MainActivity extends Activity implements CvCameraViewListener2, OnTouchListener {
+public class MainActivity extends Activity implements CvCameraViewListener2, OnClickListener {
 	private MyCameraView cameraView;
 	private ImageView imageView;
 	private ViewFlipper viewFlipper;
@@ -82,12 +83,12 @@ public class MainActivity extends Activity implements CvCameraViewListener2, OnT
 
 		cameraView = (MyCameraView) findViewById(R.id.main_camera_view);
 		cameraView.setVisibility(SurfaceView.VISIBLE);
-		cameraView.setOnTouchListener(MainActivity.this);
+		cameraView.setOnClickListener(MainActivity.this);
 		cameraView.setCvCameraViewListener(this);
 
 		imageView = (ImageView) findViewById(R.id.imageView1);
 		imageView.setVisibility(SurfaceView.INVISIBLE);
-		imageView.setOnTouchListener(MainActivity.this);
+		imageView.setOnClickListener(MainActivity.this);
 
 		viewFlipper=(ViewFlipper)findViewById(R.id.ViewFlipper01);
 	}
@@ -272,7 +273,7 @@ public class MainActivity extends Activity implements CvCameraViewListener2, OnT
 
 
 	@Override
-	public boolean onTouch(View v, MotionEvent event) { // save on touch
+	public void onClick(View v) { // save on touch
 		Boolean isSDPresent = android.os.Environment.getExternalStorageState().equals(android.os.Environment.MEDIA_MOUNTED);
 		// check if memory card is present
 		if(isSDPresent)// TODO && (galleryBitmap != null || !mRgba.empty()))
@@ -299,6 +300,7 @@ public class MainActivity extends Activity implements CvCameraViewListener2, OnT
 				// print user message
 				if (result){
 					Toast.makeText(this, getString(R.string.saveSuccess) + getString(R.string.saveDir) , Toast.LENGTH_SHORT).show();
+					sendBroadcast(new Intent(Intent.ACTION_MEDIA_MOUNTED, Uri.parse("file://" + Environment.getExternalStorageDirectory())));
 				}
 				else
 				{
@@ -312,7 +314,6 @@ public class MainActivity extends Activity implements CvCameraViewListener2, OnT
 		{
 			Toast.makeText(this, getString(R.string.saveNoCard), Toast.LENGTH_SHORT).show();
 		}
-		return false;
 	}
 
 	@Override
