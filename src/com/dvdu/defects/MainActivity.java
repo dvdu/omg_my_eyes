@@ -9,7 +9,6 @@ import java.util.Date;
 import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.CameraBridgeViewBase.CvCameraViewFrame;
 import org.opencv.android.CameraBridgeViewBase.CvCameraViewListener2;
-import org.opencv.android.JavaCameraView;
 import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
 import org.opencv.android.Utils;
@@ -35,7 +34,7 @@ import android.widget.ViewFlipper;
 
 public class MainActivity extends Activity implements CvCameraViewListener2, OnClickListener {
 	// Views
-	private JavaCameraView 		cameraView;
+	private MyCameraView 		cameraView;
 	private ImageView 			imageView;
 	private ViewFlipper 		viewFlipper;
 	
@@ -88,7 +87,7 @@ public class MainActivity extends Activity implements CvCameraViewListener2, OnC
 	}
 	
 	private void initViews(){
-		cameraView = (JavaCameraView) findViewById(R.id.main_camera_view);
+		cameraView = (MyCameraView) findViewById(R.id.main_camera_view);
 		cameraView.setVisibility(SurfaceView.VISIBLE);
 		cameraView.setOnClickListener(MainActivity.this);
 		cameraView.setCvCameraViewListener(this);
