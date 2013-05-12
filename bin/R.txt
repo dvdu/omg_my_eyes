@@ -1,15 +1,6 @@
-int array effects_int_array 0x7f060001
-int array effects_str_array 0x7f060000
 int attr camera_id 0x7f010001
 int attr show_fps 0x7f010000
 int drawable eye1 0x7f020000
-int drawable eye2 0x7f020001
-int drawable eye3 0x7f020002
-int drawable eye4 0x7f020003
-int drawable eye5 0x7f020004
-int drawable eye6 0x7f020005
-int drawable eye7 0x7f020006
-int drawable icon 0x7f020007
 int id LinearLayout02 0x7f040003
 int id ViewFlipper01 0x7f040004
 int id any 0x7f040000
@@ -18,7 +9,6 @@ int id front 0x7f040002
 int id imageView1 0x7f040006
 int id main_camera_view 0x7f040005
 int layout main_view 0x7f030000
-int layout preferences 0x7f030001
 int string app_name 0x7f050000
 int string defectCataract 0x7f050006
 int string defectDeuteranope 0x7f050003
@@ -36,8 +26,6 @@ int string saveSuccess 0x7f05000f
 int string sourceCamera 0x7f05000a
 int string sourceGallery 0x7f05000b
 int string sourceTitle 0x7f050009
-int string summary_effect 0x7f050012
-int string title_effect 0x7f050011
 int[] styleable CameraBridgeViewBase { 0x7f010000, 0x7f010001 }
 int styleable CameraBridgeViewBase_camera_id 1
 int styleable CameraBridgeViewBase_show_fps 0

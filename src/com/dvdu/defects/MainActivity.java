@@ -1,4 +1,4 @@
-package com.adudziec.defects;
+package com.dvdu.defects;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -9,6 +9,7 @@ import java.util.Date;
 import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.CameraBridgeViewBase.CvCameraViewFrame;
 import org.opencv.android.CameraBridgeViewBase.CvCameraViewListener2;
+import org.opencv.android.JavaCameraView;
 import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
 import org.opencv.android.Utils;
@@ -23,32 +24,35 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.SubMenu;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.View.OnTouchListener;
 import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.Toast;
 import android.widget.ViewFlipper;
 
 public class MainActivity extends Activity implements CvCameraViewListener2, OnClickListener {
-	private MyCameraView cameraView;
-	private ImageView imageView;
-	private ViewFlipper viewFlipper;
-	private MenuItem[] sourceMenuItems;
-	private MenuItem[] defectMenuItems;
-
-	//	private MenuItem            mItemPreferences;
-	private SubMenu	            mItemSource;				// set the Source
-	private SubMenu	            mItemDefect;				// set the Defect
-	private Mat                 mRgba;
+	// Views
+	private JavaCameraView 		cameraView;
+	private ImageView 			imageView;
+	private ViewFlipper 		viewFlipper;
+	
+	// Menus
+	private MenuItem[] 			sourceMenuItems;
+	private MenuItem[] 			defectMenuItems;
+	private SubMenu	            sourceMenu;				// set the Source
+	private SubMenu	            defectMenu;				// set the Defect
+	
+	// Image processing
+	private ImageProcessor		imageProcessor;
+	private Mat                 cameraFrame;
 	private Mat                 galleryOriginal;
 	private Mat                 galleryEffect;
 	private Bitmap				galleryBitmap = null;
-	private ImageProcessor		imageProcessor;
+
+	// Control
 	private Boolean				cameraSource = true;
 	private Boolean				imageSaved = false;
 	private static ViewModes    viewMode = ViewModes.VIEW_MODE_RGBA;
@@ -60,7 +64,6 @@ public class MainActivity extends Activity implements CvCameraViewListener2, OnC
 			case LoaderCallbackInterface.SUCCESS:
 			{
 				cameraView.enableView();
-
 			} break;
 			default:
 			{
@@ -81,16 +84,19 @@ public class MainActivity extends Activity implements CvCameraViewListener2, OnC
 		getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
 		setContentView(R.layout.main_view);
-
-		cameraView = (MyCameraView) findViewById(R.id.main_camera_view);
+		initViews();
+	}
+	
+	private void initViews(){
+		cameraView = (JavaCameraView) findViewById(R.id.main_camera_view);
 		cameraView.setVisibility(SurfaceView.VISIBLE);
 		cameraView.setOnClickListener(MainActivity.this);
 		cameraView.setCvCameraViewListener(this);
-
+		
 		imageView = (ImageView) findViewById(R.id.imageView1);
 		imageView.setVisibility(SurfaceView.INVISIBLE);
 		imageView.setOnClickListener(MainActivity.this);
-
+		
 		viewFlipper=(ViewFlipper)findViewById(R.id.ViewFlipper01);
 	}
 
@@ -113,12 +119,14 @@ public class MainActivity extends Activity implements CvCameraViewListener2, OnC
 		super.onDestroy();
 		if (cameraView != null)
 			cameraView.disableView();
+		
+		// Trigger multimedia scanner if something was saved
 		if (imageSaved)
 			sendBroadcast(new Intent(Intent.ACTION_MEDIA_MOUNTED, Uri.parse("file://" + Environment.getExternalStorageDirectory())));
 	}
 
 	public void onCameraViewStarted(int width, int height) {
-		mRgba = new Mat();
+		cameraFrame = new Mat();
 		galleryOriginal = new Mat();
 		galleryEffect = new Mat();
 	}
@@ -127,52 +135,52 @@ public class MainActivity extends Activity implements CvCameraViewListener2, OnC
 	}
 
 	public Mat onCameraFrame(CvCameraViewFrame inputFrame) {
-		mRgba = inputFrame.rgba();
+		cameraFrame = inputFrame.rgba();
 		switch (viewMode)
 		{
 		case VIEW_MODE_RGBA:
 			break;
 		case VIEW_MODE_DEUTERANOPE:
-			imageProcessor.deuteranope(mRgba);
+			imageProcessor.deuteranope(cameraFrame);
 			break;
 		case VIEW_MODE_PROTANOPE:
-			imageProcessor.protanope(mRgba);
+			imageProcessor.protanope(cameraFrame);
 			break;
 		case VIEW_MODE_TRITANOPE:
-			imageProcessor.tritanope(mRgba);
+			imageProcessor.tritanope(cameraFrame);
 			break;
 		case VIEW_MODE_CATARACT:
-			imageProcessor.cataract(mRgba);
+			imageProcessor.cataract(cameraFrame);
 			break;
 		case VIEW_MODE_DIABETIC_RETINOPATHY:
-			imageProcessor.diabeticRetinopathy(mRgba);
+			imageProcessor.diabeticRetinopathy(cameraFrame);
 			break;
 		case VIEW_MODE_RETINIS_PIGMENTOSA:
-			imageProcessor.retinisPigmentosa(mRgba);
+			imageProcessor.retinisPigmentosa(cameraFrame);
 			break;
 		default:
 			break;
 		}
-		return mRgba;
+		return cameraFrame;
 	}
 
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		mItemDefect = menu.addSubMenu(R.string.defectTitle);
+		defectMenu = menu.addSubMenu(R.string.defectTitle);
 		defectMenuItems = new MenuItem[7];
-		defectMenuItems[0] = mItemDefect.add(0, 1, Menu.NONE, R.string.defectNormal);
-		defectMenuItems[1] = mItemDefect.add(0, 2, Menu.NONE, R.string.defectDeuteranope);
-		defectMenuItems[2] = mItemDefect.add(0, 3, Menu.NONE, R.string.defectProtanope);
-		defectMenuItems[3] = mItemDefect.add(0, 4, Menu.NONE, R.string.defectTritanope);
-		defectMenuItems[4] = mItemDefect.add(0, 5, Menu.NONE, R.string.defectCataract);
-		defectMenuItems[5] = mItemDefect.add(0, 6, Menu.NONE, R.string.defectDiabeticRetinopathy);
-		defectMenuItems[6] = mItemDefect.add(0, 7, Menu.NONE, R.string.defectRetinitisPigmentosa);
+		defectMenuItems[0] = defectMenu.add(0, 1, Menu.NONE, R.string.defectNormal);
+		defectMenuItems[1] = defectMenu.add(0, 2, Menu.NONE, R.string.defectDeuteranope);
+		defectMenuItems[2] = defectMenu.add(0, 3, Menu.NONE, R.string.defectProtanope);
+		defectMenuItems[3] = defectMenu.add(0, 4, Menu.NONE, R.string.defectTritanope);
+		defectMenuItems[4] = defectMenu.add(0, 5, Menu.NONE, R.string.defectCataract);
+		defectMenuItems[5] = defectMenu.add(0, 6, Menu.NONE, R.string.defectDiabeticRetinopathy);
+		defectMenuItems[6] = defectMenu.add(0, 7, Menu.NONE, R.string.defectRetinitisPigmentosa);
 
-		mItemSource = menu.addSubMenu(R.string.sourceTitle);
+		sourceMenu = menu.addSubMenu(R.string.sourceTitle);
 		sourceMenuItems = new MenuItem[2];
-		sourceMenuItems[0] = mItemSource.add(1, 1, Menu.NONE, R.string.sourceGallery);
-		sourceMenuItems[1] = mItemSource.add(1, 2, Menu.NONE, R.string.sourceCamera);
+		sourceMenuItems[0] = sourceMenu.add(1, 1, Menu.NONE, R.string.sourceGallery);
+		sourceMenuItems[1] = sourceMenu.add(1, 2, Menu.NONE, R.string.sourceCamera);
 
 		return true;
 	}
@@ -204,7 +212,7 @@ public class MainActivity extends Activity implements CvCameraViewListener2, OnC
 			case 6:
 				viewMode = ViewModes.VIEW_MODE_DIABETIC_RETINOPATHY;
 				if (cameraSource) {
-					imageProcessor.setupRetinopathy(mRgba);
+					imageProcessor.setupRetinopathy(cameraFrame);
 				} else {
 					imageProcessor.setupRetinopathy(galleryOriginal);
 				}
@@ -212,7 +220,7 @@ public class MainActivity extends Activity implements CvCameraViewListener2, OnC
 			case 7:
 				viewMode = ViewModes.VIEW_MODE_RETINIS_PIGMENTOSA;
 				if (cameraSource) {
-					imageProcessor.setupPigmentosa(mRgba);
+					imageProcessor.setupPigmentosa(cameraFrame);
 				} else {
 					imageProcessor.setupPigmentosa(galleryOriginal);
 				}
@@ -220,6 +228,7 @@ public class MainActivity extends Activity implements CvCameraViewListener2, OnC
 			default:
 
 			}
+			// process image only if it is from gallery, otherwise onCameraFrame will take care
 			if (!cameraSource && galleryBitmap != null && !galleryEffect.empty()){
 				processImage();
 			}
@@ -227,7 +236,8 @@ public class MainActivity extends Activity implements CvCameraViewListener2, OnC
 		else if (item.getGroupId() == 1){
 			int id = item.getItemId();
 			if (id == 1){
-				// Image from gallery
+				// Gallery source
+				// Open gallery
 				Intent intent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
 				startActivityForResult(intent, 0);
 				// Switch view
@@ -240,21 +250,18 @@ public class MainActivity extends Activity implements CvCameraViewListener2, OnC
 				if (!cameraSource){
 					flipToCamera();
 				}
-
 			}
 		}
-
-
 		return true;
 	}
 
 
 
 	@Override
-	public void onClick(View v) { // save on touch
+	public void onClick(View v) { // save on click
 		Boolean isSDPresent = android.os.Environment.getExternalStorageState().equals(android.os.Environment.MEDIA_MOUNTED);
 		// check if memory card is present
-		if(isSDPresent && (galleryBitmap != null || !mRgba.empty()))
+		if(isSDPresent && (galleryBitmap != null || !cameraFrame.empty()))
 		{
 			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
 			String currentDateandTime = sdf.format(new Date());
@@ -265,9 +272,9 @@ public class MainActivity extends Activity implements CvCameraViewListener2, OnC
 			String fileName = Environment.getExternalStorageDirectory().getPath() +	getString(R.string.saveDir) + "img" + currentDateandTime + ".jpg";
 			Bitmap bmp = null;
 			if (cameraSource){
-				bmp = Bitmap.createBitmap(mRgba.cols(),mRgba.rows(),Bitmap.Config.ARGB_8888);
+				bmp = Bitmap.createBitmap(cameraFrame.cols(),cameraFrame.rows(),Bitmap.Config.ARGB_8888);
 				// convert cv::Mat to Bitmap
-				Utils.matToBitmap(mRgba, bmp, true);
+				Utils.matToBitmap(cameraFrame, bmp, true);
 			} else {
 				bmp = galleryBitmap;
 			}
@@ -277,11 +284,13 @@ public class MainActivity extends Activity implements CvCameraViewListener2, OnC
 				Boolean result = bmp.compress(Bitmap.CompressFormat.JPEG, 90, out);
 				// print user message
 				if (result){
+					// Success
 					Toast.makeText(this, getString(R.string.saveSuccess) + getString(R.string.saveDir) , Toast.LENGTH_SHORT).show();
 					imageSaved = true;
 				}
 				else
 				{
+					// Fail
 					Toast.makeText(this, getString(R.string.saveError), Toast.LENGTH_SHORT).show();
 				}
 			} catch (Exception e) {
@@ -298,20 +307,23 @@ public class MainActivity extends Activity implements CvCameraViewListener2, OnC
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
 		if (resultCode == RESULT_OK){
+			// Gallery image chosen
 			Uri targetUri = data.getData();
-
 			try {
 				galleryBitmap = BitmapFactory.decodeStream(getContentResolver().openInputStream(targetUri));
 				Utils.bitmapToMat(galleryBitmap, galleryOriginal);
 				if(galleryOriginal.empty()) {
+					// Error - image not opened
 					Toast.makeText(this, getString(R.string.openError), Toast.LENGTH_LONG).show();
 				} else {
+					// Image opened successfully
 					processImage();
 				}
 			} catch (FileNotFoundException e) {
 				e.printStackTrace();
 			}
 		} else {
+			// No image chosen - back to camera view
 			flipToCamera();
 		}
 
