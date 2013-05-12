@@ -22,6 +22,11 @@ public class ImageProcessor {
 	private double[]			LMS_RGB =  {30.830854, -29.832659, 1.610474, 
 											-6.481468, 17.715578, -2.532642,
 											-0.375690, -1.199062, 14.273846};
+	private Random r;
+	
+	public ImageProcessor(){
+		r = new Random(System.currentTimeMillis());
+	}
 
 	
 	public void setupColorBlindness(ViewModes viewMode){
@@ -72,13 +77,14 @@ public class ImageProcessor {
 	
 	public void setupPigmentosa(Mat source){
 		// only small circle of visible area
+		if (spotsMatrix != null)
+			spotsMatrix.release();
 		spotsMatrix = source.clone();
 		spotsMatrix.setTo(new Scalar(0));
 		int rows = (int) spotsMatrix.size().height;
 		int cols = (int) spotsMatrix.size().width;
 		int factor = 2;
-		
-		Random r = new Random();
+
 		// generate first (anchor) point
 		int x = cols/2;
 		int y = rows/2;
@@ -108,13 +114,14 @@ public class ImageProcessor {
 	
 	public void setupRetinopathy(Mat source){
 		// black spot in random place
+		if (spotsMatrix != null)
+			spotsMatrix.release();
 		spotsMatrix = source.clone();
-		spotsMatrix.setTo(new Scalar(1));
+		Core.pow(spotsMatrix, 0, spotsMatrix);
 		int rows = (int) spotsMatrix.size().height;
 		int cols = (int) spotsMatrix.size().width;
 		int factor = 6;
 		
-		Random r = new Random();
 		// generate first (anchor) point
 		int x = r.nextInt(cols - 2*(cols/factor)) + (cols/factor);
 		int y = r.nextInt(rows - 2*(rows/factor)) + (rows/factor);
@@ -126,7 +133,7 @@ public class ImageProcessor {
 		while( iterations < spotsMatrix.size().area()/500){
 			xPrim = x + r.nextInt((cols/factor)) - (cols/factor)/2;
 			yPrim = y + r.nextInt((rows/factor)) - (rows/factor/2);
-			if (xPrim + yPrim > distance*10)
+			if (Math.sqrt((xPrim - x)*(xPrim - x) + (yPrim - y)*(yPrim - y)) > distance)
 				continue;
 			tmpMat = spotsMatrix.submat(yPrim, yPrim+5, xPrim, xPrim+5);
 			addSpots(tmpMat, 0);
@@ -305,6 +312,7 @@ public class ImageProcessor {
 	
 	public void retinisPigmentosa(Mat mRgba){
 		Core.multiply(spotsMatrix, mRgba, mRgba);
+		Imgproc.blur(mRgba, mRgba, new Size(3, 3));
 	}
 	
 	
